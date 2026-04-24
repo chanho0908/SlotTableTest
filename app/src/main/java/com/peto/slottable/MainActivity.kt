@@ -13,6 +13,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentComposer
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +45,9 @@ fun SlotTableDemo(modifier: Modifier = Modifier) {
     val composer = currentComposer
     val composition = composer.composition
 
+    var counter by remember { mutableIntStateOf(0) }
+    val message = remember { "정페토" }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -50,6 +57,13 @@ fun SlotTableDemo(modifier: Modifier = Modifier) {
     ) {
         Text(text = "안녕")
         Text(text = "Hello")
+        Text(text = message)
+
+        Button(
+            onClick = { counter++ }
+        ) {
+            Text("카운터 증가")
+        }
 
         Button(
             onClick = {

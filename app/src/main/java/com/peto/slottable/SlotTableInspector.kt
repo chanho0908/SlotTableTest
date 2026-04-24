@@ -17,7 +17,7 @@ object SlotTableInspector {
     private const val TAG = "SlotTableInspector"
 
     /**
-     * Logs the internal structure of SlotTable's groups IntArray
+     * Logs the internal structure of SlotTable's groups IntArray and slots Array
      *
      * SlotTable structure:
      * - Each group occupies 5 slots in the groups IntArray
@@ -27,6 +27,7 @@ object SlotTableInspector {
      *   [2] Parent anchor
      *   [3] Size
      *   [4] Data anchor
+     * - slots array contains actual data (remember values, composables, etc.)
      */
     fun logSlotTable(composition: Composition?) {
         if (composition == null) {
@@ -57,6 +58,11 @@ object SlotTableInspector {
                 return
             }
 
+            // Access the slots Array<Any?> via reflection
+            val slotsField = slotTableClass.getDeclaredField("slots")
+            slotsField.isAccessible = true
+            val slots = slotsField.get(slotTable) as? Array<*>
+
             // Log the SlotTable structure
             val groupCount = groups.size / 5
             Log.d(TAG, "========================================")
@@ -64,6 +70,7 @@ object SlotTableInspector {
             Log.d(TAG, "========================================")
             Log.d(TAG, "Total groups: $groupCount")
             Log.d(TAG, "Groups array size: ${groups.size}")
+            Log.d(TAG, "Slots array size: ${slots?.size ?: 0}")
             Log.d(TAG, "========================================")
 
             // Log each group's 5 fields
@@ -77,6 +84,27 @@ object SlotTableInspector {
                 Log.d(TAG, "Parent anchor: ${groups[baseIndex + 2]}")
                 Log.d(TAG, "Size         : ${groups[baseIndex + 3]}")
                 Log.d(TAG, "Data anchor  : ${groups[baseIndex + 4]}")
+            }
+
+            // Log slots array content
+            if (slots != null && slots.isNotEmpty()) {
+                Log.d(TAG, "")
+                Log.d(TAG, "========================================")
+                Log.d(TAG, "Slots Array Content (remember 데이터)")
+                Log.d(TAG, "========================================")
+
+                for (i in slots.indices) {
+                    val slot = slots[i]
+                    if (slot != null) {
+                        val slotClass = slot.javaClass.simpleName
+                        val slotValue = when (slot) {
+                            is String -> "\"$slot\""
+                            is Number -> slot.toString()
+                            else -> "${slot.javaClass.simpleName}@${Integer.toHexString(slot.hashCode())}"
+                        }
+                        Log.d(TAG, "Slot[$i] = $slotValue (type: $slotClass)")
+                    }
+                }
             }
 
             Log.d(TAG, "")
